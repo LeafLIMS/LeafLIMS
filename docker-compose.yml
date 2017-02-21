@@ -7,7 +7,7 @@ services:
         volumes:
             - lims_data:/var/lib/postgresql
     backend:
-        image: leaflims/backend
+        image: leaflims/backend:latest
         env_file: .env
         command: dockerize -wait tcp://db:5432 -timeout 30s bash -c "python manage.py migrate && python manage.py createinitialrevisions && python manage.py create_admin && daphne -b 0.0.0.0 -p 8000 lims.asgi:channel_layer"
         ports:
@@ -18,7 +18,7 @@ services:
             - db
             - redis
     channel_worker:
-        image: leaflims/backend
+        image: leaflims/backend:latest
         command: python manage.py runworker --settings=lims.settings
         depends_on:
             - backend
@@ -29,5 +29,11 @@ services:
             context: frontend/
         ports:
             - "80:80"
+            - "443:443"
+        links:
+            - backend
+        volumes:
+            - "/<location_on_server>/ssl_cert.crt:/etc/nginx/certs/ssl_cert.crt"
+            - "/<location_on_server>/ssl_key.key:/etc/nginx/certs/ssl_key.key"
 volumes:
     lims_data:
