@@ -1,3 +1,3 @@
-FROM leaflims/frontend:2.1.1
+FROM leaflims/frontend:2.2
 
 COPY config.js /usr/share/nginx/html/modules/config.js
