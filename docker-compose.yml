@@ -7,7 +7,7 @@ services:
         volumes:
             - lims_data:/var/lib/postgresql
     backend:
-        image: leaflims/backend:2.2.2
+        image: leaflims/backend:2.1.3
         env_file: .env
         command: dockerize -wait tcp://db:5432 -timeout 30s bash -c "python manage.py migrate && python manage.py createinitialrevisions && python manage.py create_admin && daphne -b 0.0.0.0 -p 8000 lims.asgi:channel_layer"
         ports:
@@ -18,13 +18,13 @@ services:
             - db
             - redis
         volumes:
-            - "<filestore_directory_on_server>:/var/filestore/"
+            - "${FILE_STORE}:/var/filestore/"
     channel_worker:
-        image: leaflims/backend:2.2.2
+        image: leaflims/backend:2.1.3
         env_file: .env
         command: python manage.py runworker --settings=lims.settings
         volumes:
-            - "<filestore_directory_on_server>:/var/filestore/"
+            - "${FILE_STORE}:/var/filestore/"
         depends_on:
             - backend
         links:
@@ -32,14 +32,15 @@ services:
     frontend:
         build:
             context: frontend/
+        env_file: .env
         ports:
             - "80:80"
             - "443:443"
         links:
             - backend
         volumes:
-            - "/<location_on_server>/ssl_cert.crt:/etc/nginx/certs/ssl_cert.crt"
-            - "/<location_on_server>/ssl_key.key:/etc/nginx/certs/ssl_key.key"
-            - "<filestore_directory_on_server>:/var/filestore/"
+            - "${CERT_LOCATION}:/etc/nginx/certs/ssl_cert.crt"
+            - "${KEY_LOCATION}:/etc/nginx/certs/ssl_key.key"
+            - "${FILE_STORE}:/var/filestore/"
 volumes:
     lims_data:
