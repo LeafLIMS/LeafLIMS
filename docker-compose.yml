@@ -5,7 +5,7 @@ services:
     db:
         image: postgres:9.5
         volumes:
-            - lims_data:/var/lib/postgresql
+            - lims_data:/var/lib/postgresql/data
     backend:
         image: leaflims/backend:2.1.3
         env_file: .env
