@@ -249,8 +249,7 @@ DB_PORT=5432
 """
         env_string = ''
         for key, value in self.settings.items():
-            if key != 'DOMAIN':
-                env_string += key + '=' + value + '\n'
+            env_string += key + '=' + value + '\n'
         env_string += required_settings
         with open('.env', 'w+') as f:
             f.write(env_string)
