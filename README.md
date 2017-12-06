@@ -12,19 +12,43 @@ Leaf LIMS uses [Docker](https://docker.com) to easily bundle all the necessary c
 
 1. [Docker](https://www.docker.com/get-docker)
 2. [Docker Compose](https://docs.docker.com/compose/install/)
-3. Some basic knowledge of terminal commands
+3. Python 3
+4. Some basic knowledge of terminal commands
 
-## Deploying to Docker
+## Quickstart deploying to Docker
 
-1. [Download](https://github.com/LeafLIMS/LeafLIMS/releases/latest) the latest release of Leaf LIMS to the location you would like to run it and unzip.
-2. Edit the `frontend/config.js` file, replacing "localhost" in `.constant('API_URL', 'https://localhost/api/')` with the URL of your system.
-3. Edit the `.env` file to set the required configuration values as explained in the file. On Linux/Mac it will be hidden, open using a text editor such as nano or Vim.
-4. Ensure your terminal is in the directory where the files are (`cd /directory`) and run `docker-compose -p leaflims up --build -d`
-5. Be patient while the system starts up (this takes a few minutes as it ensures all components go up in the correct order)
-6. Visit the URL that you specified instead of localhost and log in with the username `admin` and the password you set.
+This requires that you have a recent version of [Docker](https://docker.com) that includes
+the docker-compose tool. You will also need Python 3 to run the installer and an SSL certificate
+(self-signed works, see this
+ [stackoverflow](https://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl question)
+question for more details).
+
+1. Download the [setup files](https://github.com/LeafLIMS/LeafLIMS/releases/latest) and unzip
+   on the server you want to run Leaf LIMS on.
+2. Run the installer: `./installer.py` and answer the questions. The administration password can
+   be changed once the system has been created.
+3. The installer will then start Leaf LIMS. Wait a minute for configuration to happen and then
+   head to the web address you configured to login with the username `admin`.
 
 For more information on options that can be set during deployment please see the documentation at
-the [Leaf LIMS website](https://leaflims.github.io).
+the [Leaf LIMS website](https://leaflims.github.io/docs).
+
+## Manually configuring the system
+
+The installer will automatically generate a .env file that is required for running the system in
+Docker. If you would like to manually edit this file you can rename the env.template file to .env
+and edit the values there.
+
+If you run the installer after manually configuring values it will overwrite the values in
+this file.
+
+All configuration variables related to the running of the system are set using environmental
+variables. For a list of these and the defaults please see the
+[environmental variables](https://leaflims.github.io/docs/environmental-variables/) section.
+
+You will also need to change the `frontend/config.json` file and replace the `localhost` in the
+`"api_endpoint": "https://localhost/api/",` line to match your domain. You will also need to
+change `crm_enabled` if you want to enable CRM.
 
 ### I don't think it worked!
 
@@ -33,6 +57,9 @@ By default the docker-compose command given tells docker to run it in the backgr
 Leaf LIMS has been tested on Mac and Linux only, you are likely to encounter problems when running on Windows.
 
 ### Changing ports
+
+**For advanced users only. This is usually not required unless you are running multiple instances/
+sharing with another application**
 
 By default the docker instance runs on ports 80 for the frontend and 8000 for the backend. You can
 change these in the docker-compose.yml file by editing the port definition in the file. You only

@@ -236,6 +236,7 @@ that needs changing. If they are correct press enter to continue.
                 as_json['crm_enabled'] = False
             json_string = json.dumps(as_json, indent=4)
             f.write(json_string)
+        os.chmod('frontend/config.json', 0o775)
 
     def write_env_file(self):
         # write out the .env file

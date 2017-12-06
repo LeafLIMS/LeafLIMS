@@ -3,11 +3,11 @@
     "crm_enabled": false,
     "plugins": {
         "product-detail-top": [
-            "dist/optimised-for-organism",
+            "dist/optimised-for-organism/optimised-for-organism",
             "dist/sbol-design/sbol-design"
         ],
         "create-product": [
-            "dist/optimised-for-organism"
+            "dist/optimised-for-organism/optimised-for-organism"
         ]
     }
 }
