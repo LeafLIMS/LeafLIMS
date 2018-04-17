@@ -2,14 +2,15 @@ version: '2'
 services:
     redis:
         image: redis
+        restart: always
     db:
         image: postgres:9.5
         volumes:
             - lims_data:/var/lib/postgresql/data
     backend:
-        image: leaflims/backend:3.0
+        image: leaflims/backend:3.2
         env_file: .env
-        command: dockerize -wait tcp://db:5432 -timeout 30s bash -c "python manage.py migrate && python manage.py createinitialrevisions && python manage.py create_admin && daphne -b 0.0.0.0 -p 8000 lims.asgi:channel_layer"
+        command: dockerize -wait tcp://db:5432 -timeout 120s bash -c "python manage.py migrate && python manage.py createinitialrevisions && python manage.py create_admin && daphne -b 0.0.0.0 -p 8000 lims.asgi:channel_layer"
         depends_on:
             - db
         links:
@@ -17,16 +18,31 @@ services:
             - redis
         volumes:
             - "${FILE_STORE}:/var/filestore/"
+        restart: always
     channel_worker:
-        image: leaflims/backend:3.0
+        image: leaflims/backend:3.2
         env_file: .env
-        command: python manage.py runworker --settings=lims.settings
+        command: dockerize -wait tcp://backend:8000 -timeout 160s bash -c "python manage.py runworker --settings=lims.settings"
         volumes:
             - "${FILE_STORE}:/var/filestore/"
         depends_on:
             - backend
         links:
+            - backend
             - redis
+        restart: always
+    celery_worker:
+        image: leaflims/backend:3.2
+        env_file: .env
+        command: dockerize -wait tcp://backend:8000 -timeout 160s bash -c "celery -A lims worker -B -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+        volumes:
+            - "${FILE_STORE}:/var/filestore/"
+        depends_on:
+            - backend
+        links:
+            - backend
+            - redis
+        restart: always
     frontend:
         build:
             context: frontend/
@@ -40,5 +56,6 @@ services:
             - "${CERT_LOCATION}:/etc/nginx/certs/ssl_cert.crt"
             - "${KEY_LOCATION}:/etc/nginx/certs/ssl_key.key"
             - "${FILE_STORE}:/var/filestore/"
+        restart: always
 volumes:
     lims_data:
