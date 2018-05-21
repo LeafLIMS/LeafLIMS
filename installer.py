@@ -152,6 +152,15 @@ once set it is difficult to change these values.
         self.settings['PROJECT_IDENTIFIER_START'] = \
                 self.input_default("Project identifier start: ", "100")
 
+    def plugin_variables(self):
+        print(colours.BOLD + '\n------------ Plugin Settings ------------' + colours.ENDC)
+        print("""
+The following settings are only required if you plan to use plugins with
+Leaf LIMS. Press enter to accept the default if you don't need them.
+""")
+        self.settings['EXTERNAL_PLUGINS'] = \
+                self.input_default("Directory containing plugins: ", "./plugins")
+
     def email_variables(self):
         print(colours.BOLD + '\n------------ Email Settings ------------' + colours.ENDC)
         print("""
@@ -272,6 +281,7 @@ DB_PORT=5432
             self.frontend_domain()
             self.required_environmental_variables()
             self.optional_environmental_variables()
+            self.plugin_variables()
             self.email_variables()
             self.crm_variables()
         else:

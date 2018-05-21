@@ -8,7 +8,7 @@ services:
         volumes:
             - lims_data:/var/lib/postgresql/data
     backend:
-        image: leaflims/backend:3.2
+        image: leaflims/backend:3.3
         env_file: .env
         command: dockerize -wait tcp://db:5432 -timeout 120s bash -c "python manage.py migrate && python manage.py createinitialrevisions && python manage.py create_admin && daphne -b 0.0.0.0 -p 8000 lims.asgi:channel_layer"
         depends_on:
@@ -18,13 +18,15 @@ services:
             - redis
         volumes:
             - "${FILE_STORE}:/var/filestore/"
+            - "${EXTERNAL_PLUGINS}:/usr/src/app/lims/lims/plugins/external"
         restart: always
     channel_worker:
-        image: leaflims/backend:3.2
+        image: leaflims/backend:3.3
         env_file: .env
         command: dockerize -wait tcp://backend:8000 -timeout 160s bash -c "python manage.py runworker --settings=lims.settings"
         volumes:
             - "${FILE_STORE}:/var/filestore/"
+            - "${EXTERNAL_PLUGINS}:/usr/src/app/lims/lims/plugins/external"
         depends_on:
             - backend
         links:
@@ -32,11 +34,12 @@ services:
             - redis
         restart: always
     celery_worker:
-        image: leaflims/backend:3.2
+        image: leaflims/backend:3.3
         env_file: .env
         command: dockerize -wait tcp://backend:8000 -timeout 160s bash -c "celery -A lims worker -B -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
         volumes:
             - "${FILE_STORE}:/var/filestore/"
+            - "${EXTERNAL_PLUGINS}:/usr/src/app/lims/lims/plugins/external"
         depends_on:
             - backend
         links:
